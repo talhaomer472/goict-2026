@@ -1,0 +1,68 @@
+name: GOICT-2026 weekly update
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"      # every Monday 06:00 UTC
+  workflow_dispatch:          # "Run workflow" button for manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: System libraries for sf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdal-dev libgeos-dev libproj-dev \
+            libudunits2-dev libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::tidyverse
+            any::readxl
+            any::lubridate
+            any::countrycode
+            any::scales
+            any::WDI
+            any::sf
+            any::rnaturalearth
+            any::rnaturalearthdata
+            any::ggrepel
+            any::shiny
+            any::bslib
+            any::rsconnect
+
+      - name: Run pipeline
+        run: Rscript run_all.R
+
+      - name: Validate
+        run: Rscript validate.R
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "goict-bot"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add GOICT_2026_output/GOICT_results.rds \
+                  GOICT_2026_output/GOICT_decomposition.rds \
+                  GOICT_2026_output/GOICT_headline.rds \
+                  GOICT_2026_output/GOICT_app_status.rds
+          git commit -m "Data update $(date -u +%F)" || echo "No changes"
+          git push
+
+      - name: Deploy app
+        env:
+          SHINYAPPS_NAME:   ${{ secrets.SHINYAPPS_NAME }}
+          SHINYAPPS_TOKEN:  ${{ secrets.SHINYAPPS_TOKEN }}
+          SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+        run: Rscript deploy.R

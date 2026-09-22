@@ -1,0 +1,14 @@
+# raw downloads: large, and re-downloadable
+GOICT_vintages/
+# working files
+prev_status.rds
+.Rhistory
+.RData
+.Rproj.user/
+rsconnect/
+# everything in the output folder except what the app needs
+GOICT_2026_output/*
+!GOICT_2026_output/GOICT_results.rds
+!GOICT_2026_output/GOICT_decomposition.rds
+!GOICT_2026_output/GOICT_headline.rds
+!GOICT_2026_output/GOICT_app_status.rds
