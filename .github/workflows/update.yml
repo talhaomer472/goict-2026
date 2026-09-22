@@ -45,6 +45,7 @@ jobs:
             any::shiny
             any::bslib
             any::rsconnect
+            any::cpp11
 
       - name: Run pipeline
         run: Rscript run_all.R
@@ -68,4 +69,4 @@ jobs:
           SHINYAPPS_NAME:   ${{ secrets.SHINYAPPS_NAME }}
           SHINYAPPS_TOKEN:  ${{ secrets.SHINYAPPS_TOKEN }}
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
-        run: Rscript deploy.R
+        run: Rscript -e 'options(rsconnect.packrat = TRUE); source("deploy.R")'
